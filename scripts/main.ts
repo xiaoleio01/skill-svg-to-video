@@ -7,19 +7,19 @@ import { writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
 // Configuration - 使用文生图接口文档的API
-const IMAGE_API_KEY = "XXXXX";
+const IMAGE_API_KEY = "XXXXXXX";
 const IMAGE_API_URL = "https://sg2.dchai.cn/v1/chat/completions";
 const IMAGE_MODEL = "Nano_Banana_2_2K_0";
 const CHARS_PER_SECOND = 3.5;
 const OUTPUT_BASE = join(process.env.HOME ?? ".", "Desktop", "内容SVG输出");
 
-// Style presets with better prompt engineering
+// Style presets - subdued colors suitable for news/editorial
 const STYLE_PROMPTS: Record<string, { base: string; texture: string; mood: string; typography: string }> = {
   "bold-editorial": {
-    base: "Editorial magazine cover, bold typography, dramatic composition, vibrant colors",
-    texture: "clean with bold graphic elements",
-    mood: "vibrant, high-contrast",
-    typography: "bold editorial headlines"
+    base: "Editorial news style, clean professional layout, documentary aesthetic",
+    texture: "subtle matte finish, refined textures",
+    mood: "professional, understated, trustworthy",
+    typography: "clean sans-serif headlines"
   },
   "notion": {
     base: "Clean minimalist design, geometric shapes, professional aesthetic",
@@ -182,22 +182,24 @@ function detectStyle(contentType: string): string {
 }
 
 // Build enhanced prompt for image generation
+// 重要：不将播报内容嵌入图片，只生成与内容场景契合的背景图
 function buildImagePrompt(style: string, contentType: string, slideContent: string): string {
   const styleConfig = STYLE_PROMPTS[style] || STYLE_PROMPTS["bold-editorial"];
 
-  const typeVisual: Record<string, string> = {
-    "新闻": "Modern digital news graphic, dynamic composition, financial/business news aesthetic",
-    "故事": "Narrative illustration, emotional storytelling visual, engaging scene",
-    "教学": "Educational diagram, clear visual explanation, learning aid style",
-    "科普": "Scientific visualization, infographic style, data-driven graphic",
-    "知识分享": "Clean informative graphic, modern design, shareable visual",
-    "产品介绍": "Professional product showcase, clean corporate style, feature highlight",
-    "其他": "Contemporary digital art, vibrant modern aesthetic"
+  // 场景提示词映射 - 描述内容场景而非嵌入文字
+  const typeScene: Record<string, string> = {
+    "新闻": "News broadcast studio setting, professional journalism environment, neutral backdrop",
+    "故事": "Narrative scene illustration, emotional atmosphere, storytelling setting",
+    "教学": "Classroom teaching environment, educational setting, learning atmosphere",
+    "科普": "Scientific research laboratory, technology visualization, data-driven environment",
+    "知识分享": "Modern knowledge workspace, professional sharing environment, clean backdrop",
+    "产品介绍": "Professional product showcase, clean corporate environment, modern setting",
+    "其他": "Contemporary professional setting, clean modern backdrop, neutral aesthetic"
   };
 
-  const typeVisualStr = typeVisual[contentType] || typeVisual["其他"];
+  const sceneStr = typeScene[contentType] || typeScene["其他"];
 
-  return `${typeVisualStr}, ${styleConfig.base}, ${styleConfig.texture}, ${styleConfig.mood} mood, ${styleConfig.typography}. Content: ${slideContent.slice(0, 80)}`;
+  return `Professional news graphic design, ${sceneStr}, ${styleConfig.base}, ${styleConfig.texture}, ${styleConfig.mood} mood, ${styleConfig.typography}. 9:16 vertical format, subtle muted tones, no text overlay`;
 }
 
 // Split content into slides

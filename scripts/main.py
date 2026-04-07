@@ -14,20 +14,20 @@ from datetime import datetime
 from pathlib import Path
 
 # Configuration - 使用文生图接口文档的API
-IMAGE_API_KEY = "XXXXX"
+IMAGE_API_KEY = "XXXXXXX"
 IMAGE_API_URL = "https://sg2.dchai.cn/v1/chat/completions"
 IMAGE_MODEL = "Nano_Banana_2_2K_0"
 
 CHARS_PER_SECOND = 3.5
 OUTPUT_BASE = os.path.expanduser("~/Desktop/内容SVG输出")
 
-# Style presets with better prompt engineering
+# Style presets - subdued colors suitable for news/editorial
 STYLE_PROMPTS = {
     "bold-editorial": {
-        "base": "Editorial magazine cover, bold typography, dramatic composition, vibrant colors",
-        "texture": "clean with bold graphic elements",
-        "mood": "vibrant, high-contrast",
-        "typography": "bold editorial headlines"
+        "base": "Editorial news style, clean professional layout, documentary aesthetic",
+        "texture": "subtle matte finish, refined textures",
+        "mood": "professional, understated, trustworthy",
+        "typography": "clean sans-serif headlines"
     },
     "notion": {
         "base": "Clean minimalist design, geometric shapes, professional aesthetic",
@@ -183,22 +183,23 @@ def detect_style(content_type):
 
 
 def build_image_prompt(style, content_type, slide_content):
-    """Build enhanced prompt for image generation."""
+    """Build enhanced prompt for image generation - 不嵌入播报内容，只生成与场景契合的背景图."""
     style_config = STYLE_PROMPTS.get(style, STYLE_PROMPTS["bold-editorial"])
 
-    type_visual = {
-        "新闻": "Modern digital news graphic, dynamic composition, financial/business news aesthetic",
-        "故事": "Narrative illustration, emotional storytelling visual, engaging scene",
-        "教学": "Educational diagram, clear visual explanation, learning aid style",
-        "科普": "Scientific visualization, infographic style, data-driven graphic",
-        "知识分享": "Clean informative graphic, modern design, shareable visual",
-        "产品介绍": "Professional product showcase, clean corporate style, feature highlight",
-        "其他": "Contemporary digital art, vibrant modern aesthetic"
+    # 场景提示词映射 - 描述内容场景而非嵌入文字
+    type_scene = {
+        "新闻": "News broadcast studio setting, professional journalism environment, neutral backdrop",
+        "故事": "Narrative scene illustration, emotional atmosphere, storytelling setting",
+        "教学": "Classroom teaching environment, educational setting, learning atmosphere",
+        "科普": "Scientific research laboratory, technology visualization, data-driven environment",
+        "知识分享": "Modern knowledge workspace, professional sharing environment, clean backdrop",
+        "产品介绍": "Professional product showcase, clean corporate environment, modern setting",
+        "其他": "Contemporary professional setting, clean modern backdrop, neutral aesthetic"
     }
 
-    type_visual_str = type_visual.get(content_type, type_visual["其他"])
+    scene_str = type_scene.get(content_type, type_scene["其他"])
 
-    return f"{type_visual_str}, {style_config['base']}, {style_config['texture']}, {style_config['mood']} mood, {style_config['typography']}. Content: {slide_content[:80]}"
+    return f"Professional news graphic design, {scene_str}, {style_config['base']}, {style_config['texture']}, {style_config['mood']} mood, {style_config['typography']}. 9:16 vertical format, subtle muted tones, no text overlay"
 
 
 def split_content(content, slide_count=None):

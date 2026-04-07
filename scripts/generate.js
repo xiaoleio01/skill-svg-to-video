@@ -31,9 +31,24 @@ function detectStyle(contentType) {
   return "bold-editorial";
 }
 
+// Build enhanced prompt - 不嵌入播报内容，只生成与场景契合的背景图
 function buildImagePrompt(style, contentType, slideContent) {
-  const base = "Editorial magazine cover, bold typography, dramatic composition, vibrant colors";
-  return `Modern digital news graphic, dynamic composition, financial/business news aesthetic, ${base}, clean with bold graphic elements, vibrant high-contrast mood, bold editorial headlines. Content: ${slideContent.slice(0, 80)}`;
+  const base = "Editorial news style, clean professional layout, documentary aesthetic";
+
+  // 场景提示词映射 - 描述内容场景而非嵌入文字
+  const typeScene = {
+    "新闻": "News broadcast studio setting, professional journalism environment, neutral backdrop",
+    "故事": "Narrative scene illustration, emotional atmosphere, storytelling setting",
+    "教学": "Classroom teaching environment, educational setting, learning atmosphere",
+    "科普": "Scientific research laboratory, technology visualization, data-driven environment",
+    "知识分享": "Modern knowledge workspace, professional sharing environment, clean backdrop",
+    "产品介绍": "Professional product showcase, clean corporate environment, modern setting",
+    "其他": "Contemporary professional setting, clean modern backdrop, neutral aesthetic"
+  };
+
+  const sceneStr = typeScene[contentType] || typeScene["其他"];
+
+  return `Professional news graphic design, ${sceneStr}, ${base}, subtle matte finish, refined textures, professional understated trustworthy mood, clean sans-serif headlines. 9:16 vertical format, subtle muted tones, no text overlay`;
 }
 
 async function callAI(prompt, maxTokens = 2000) {
